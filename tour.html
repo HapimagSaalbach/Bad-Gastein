@@ -576,20 +576,31 @@ function normalize(s){
     .replace(/ß/g,'ss');
 }
 
+<script>
 /* -----------------------------------------
-   PUZZLE – Drag & Drop
+   PUZZLE – Drag & Drop (NEU, mit Korrektur)
 ----------------------------------------- */
+
+let draggedTile = null;
+
+// Puzzle starten
 function startPuzzle(){
   document.getElementById("mainCard").style.display="none";
   document.getElementById("puzzleOverlay").style.display="flex";
 
-  // Slots erzeugen
   const slots = document.getElementById("puzzleSlots");
   slots.innerHTML = "";
+
+  // 8 Slots erstellen
   for(let i=0; i<8; i++){
     const s = document.createElement("div");
     s.className = "slot";
     s.dataset.index = i;
+
+    // Drops erlauben
+    s.addEventListener("dragover", dragOver);
+    s.addEventListener("drop", dropIntoSlot);
+
     slots.appendChild(s);
   }
 
@@ -597,8 +608,8 @@ function startPuzzle(){
   const letters = [...collectedLetters];
   letters.sort(() => Math.random() - 0.5);
 
-  const tiles = document.getElementById("puzzleLetters");
-  tiles.innerHTML = "";
+  const pool = document.getElementById("puzzleLetters");
+  pool.innerHTML = "";
 
   letters.forEach(L=>{
     const t = document.createElement("div");
@@ -607,44 +618,89 @@ function startPuzzle(){
     t.draggable = true;
     t.dataset.letter = L;
 
+    // Events
     t.addEventListener("dragstart", dragStart);
     t.addEventListener("dragend", dragEnd);
 
-    tiles.appendChild(t);
+    pool.appendChild(t);
   });
 
-  document.querySelectorAll(".slot").forEach(slot=>{
-    slot.addEventListener("dragover", dragOver);
-    slot.addEventListener("drop", dropLetter);
-  });
+  // Pool Drop erlauben (zurücklegen)
+  pool.addEventListener("dragover", dragOver);
+  pool.addEventListener("drop", dropIntoPool);
 }
 
-let draggedTile = null;
-
+/* -----------------------------------------
+   DRAGGING
+----------------------------------------- */
 function dragStart(){
   draggedTile = this;
-  setTimeout(()=> this.style.opacity = "0.3", 0);
+  this.style.opacity = "0.3";
 }
-
 function dragEnd(){
   this.style.opacity = "1";
 }
-
 function dragOver(e){
   e.preventDefault();
 }
 
-function dropLetter(e){
+/* -----------------------------------------
+   DROP IN SLOT (einsetzen / tauschen)
+----------------------------------------- */
+function dropIntoSlot(e){
   e.preventDefault();
+
   if(!draggedTile) return;
 
-  if(this.textContent.trim() === ""){
-    this.textContent = draggedTile.dataset.letter;
-    draggedTile.remove();
-    checkPuzzleSolved();
+  // Falls im Slot bereits ein Buchstabe liegt → zurück in Pool
+  if(this.textContent.trim() !== ""){
+    const old = document.createElement("div");
+    old.className = "letterTile";
+    old.textContent = this.textContent.trim();
+    old.dataset.letter = this.textContent.trim();
+    old.draggable = true;
+    old.addEventListener("dragstart", dragStart);
+    old.addEventListener("dragend", dragEnd);
+
+    document.getElementById("puzzleLetters").appendChild(old);
   }
+
+  // Slot mit neuem Buchstaben belegen
+  this.textContent = draggedTile.dataset.letter;
+  draggedTile.remove();
+
+  checkPuzzleSolved();
 }
 
+/* -----------------------------------------
+   DROP IN POOL (Buchstabe zurück unten ablegen)
+----------------------------------------- */
+function dropIntoPool(e){
+  e.preventDefault();
+
+  if(!draggedTile) return;
+
+  // Wenn der Buchstabe aus einem Slot kommt: Slot leeren
+  const slots = document.querySelectorAll(".slot");
+  slots.forEach(slot=>{
+    if(slot.textContent.trim() === draggedTile.dataset.letter){
+      slot.textContent = "";
+    }
+  });
+
+  // Buchstabe zurücklegen
+  const pool = document.getElementById("puzzleLetters");
+  draggedTile.style.opacity = "1";
+
+  // Neu positionieren
+  pool.appendChild(draggedTile);
+
+  checkPuzzleSolved();
+}
+
+/* -----------------------------------------
+   PUZZLE PRÜFUNG
+----------------------------------------- */
 function checkPuzzleSolved(){
   const slots = Array.from(document.querySelectorAll(".slot"));
   const word = slots.map(s => s.textContent.trim()).join("");
@@ -657,6 +713,5 @@ function checkPuzzleSolved(){
   }
 }
 </script>
-
 </body>
 </html>
