@@ -587,7 +587,7 @@ function normalize(s){
 }
 
 /* ============================================================
-   PUZZLE – DRAG & DROP
+   PUZZLE – DRAG & DROP (NEUE, KORRIGIERBARE VERSION)
 ============================================================ */
 
 let draggedTile = null;
@@ -600,6 +600,7 @@ function startPuzzle(){
   const slots = document.getElementById("puzzleSlots");
   slots.innerHTML = "";
 
+  // Slots erstellen
   for(let i = 0; i < 8; i++){
     const box = document.createElement("div");
     box.className = "slot";
@@ -611,7 +612,7 @@ function startPuzzle(){
     slots.appendChild(box);
   }
 
-  /* Buchstaben mischen */
+  // Buchstaben mischen
   const letters = [...collectedLetters];
   letters.sort(()=> Math.random() - 0.5);
 
@@ -638,49 +639,63 @@ function createTile(letter, parent){
   parent.appendChild(t);
 }
 
-/* DRAG START/END */
-function dragStart(){ draggedTile = this; this.style.opacity = "0.3"; }
-function dragEnd(){ this.style.opacity = "1"; draggedTile = null; }
-function allowDrop(e){ e.preventDefault(); }
+/* DRAG START & END */
+function dragStart(){
+  draggedTile = this;
+  this.style.opacity = "0.3";
+}
+function dragEnd(){
+  this.style.opacity = "1";
+  draggedTile = null;
+}
+function allowDrop(e){
+  e.preventDefault();
+}
 
-/* DROP INTO SLOT */
+/* DROP INTO SLOT (KORRIGIERBAR) */
 function dropIntoSlot(e){
   e.preventDefault();
   if(!draggedTile) return;
 
   const letter = draggedTile.dataset.letter;
 
+  // Wenn im Slot schon ein Buchstabe ist → zurück in den Pool
   if(this.textContent.trim() !== ""){
-    const old = this.textContent.trim();
-    createTile(old, document.getElementById("puzzleLetters"));
+    const oldLetter = this.textContent.trim();
+    createTile(oldLetter, document.getElementById("puzzleLetters"));
   }
 
+  // Slot mit neuem Buchstaben auffüllen
   this.textContent = letter;
+
+  // Alte Kachel entfernen
   draggedTile.remove();
 
   checkSolved();
 }
 
-/* DROP INTO POOL */
+/* DROP INTO POOL (zurücklegen) */
 function dropIntoPool(e){
   e.preventDefault();
   if(!draggedTile) return;
 
+  const pool = document.getElementById("puzzleLetters");
   const letter = draggedTile.dataset.letter;
 
+  // Wenn dieser Buchstabe irgendwo im Slot steht → Slot leeren
   document.querySelectorAll(".slot").forEach(slot=>{
     if(slot.textContent.trim() === letter){
       slot.textContent = "";
     }
   });
 
-  createTile(letter, document.getElementById("puzzleLetters"));
+  createTile(letter, pool);
   draggedTile.remove();
 
   checkSolved();
 }
 
-/* PUZZLE LÖSUNG PRÜFEN */
+/* LÖSUNG PRÜFEN */
 function checkSolved(){
   const word = [...document.querySelectorAll(".slot")]
                .map(s=>s.textContent.trim())
@@ -693,6 +708,3 @@ function checkSolved(){
     }, 300);
   }
 }
-</script>
-</body>
-</html>
