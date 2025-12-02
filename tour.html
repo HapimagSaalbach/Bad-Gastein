@@ -328,7 +328,7 @@ input{
     width:55px;
   }
 
-  /* --- Puzzle --- */
+    /* --- Puzzle --- */
   .slot,
   .letterTile{
     width:72px;
@@ -346,6 +346,18 @@ input{
   .letterTile,
   .slot{
     touch-action:none;
+  }
+
+  /* --- MOBILES SCROLL-FIX --- */
+  .levelBox,
+  .introBox,
+  .popupBox {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fullOverlay {
+    overflow: hidden;
   }
 }
 </style>
@@ -826,4 +838,5 @@ function resetPuzzle(){
 </script>
 </body>
 </html>
+
 
