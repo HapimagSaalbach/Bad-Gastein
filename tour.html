@@ -577,141 +577,131 @@ function normalize(s){
 }
 
 <script>
-/* -----------------------------------------
-   PUZZLE – Drag & Drop (NEU, mit Korrektur)
------------------------------------------ */
+<script>
 
+/* ======= GLOBAL ======= */
 let draggedTile = null;
 
-// Puzzle starten
+/* ======= PUZZLE START ======= */
 function startPuzzle(){
-  document.getElementById("mainCard").style.display="none";
-  document.getElementById("puzzleOverlay").style.display="flex";
+  // Hauptkarte ausblenden, Puzzle zeigen
+  document.getElementById("mainCard").style.display = "none";
+  document.getElementById("puzzleOverlay").style.display = "flex";
 
+  /* Slots vorbereiten */
   const slots = document.getElementById("puzzleSlots");
   slots.innerHTML = "";
+  for (let i = 0; i < 8; i++){
+    const box = document.createElement("div");
+    box.className = "slot";
+    box.dataset.index = i;
 
-  // 8 Slots erstellen
-  for(let i=0; i<8; i++){
-    const s = document.createElement("div");
-    s.className = "slot";
-    s.dataset.index = i;
+    box.addEventListener("dragover", allowDrop);
+    box.addEventListener("drop", dropIntoSlot);
 
-    // Drops erlauben
-    s.addEventListener("dragover", dragOver);
-    s.addEventListener("drop", dropIntoSlot);
-
-    slots.appendChild(s);
+    slots.appendChild(box);
   }
 
-  // Buchstaben mischen
+  /* Buchstaben mischen */
   const letters = [...collectedLetters];
   letters.sort(() => Math.random() - 0.5);
 
   const pool = document.getElementById("puzzleLetters");
   pool.innerHTML = "";
 
-  letters.forEach(L=>{
-    const t = document.createElement("div");
-    t.className = "letterTile";
-    t.textContent = L;
-    t.draggable = true;
-    t.dataset.letter = L;
-
-    // Events
-    t.addEventListener("dragstart", dragStart);
-    t.addEventListener("dragend", dragEnd);
-
-    pool.appendChild(t);
+  letters.forEach(L => {
+    createTile(L, pool);
   });
 
-  // Pool Drop erlauben (zurücklegen)
-  pool.addEventListener("dragover", dragOver);
+  // Pool selbst muss drop akzeptieren
+  pool.addEventListener("dragover", allowDrop);
   pool.addEventListener("drop", dropIntoPool);
 }
 
-/* -----------------------------------------
-   DRAGGING
------------------------------------------ */
+/* ======= TILE ERSTELLEN ======= */
+function createTile(letter, parent){
+  const t = document.createElement("div");
+  t.className = "letterTile";
+  t.textContent = letter;
+  t.dataset.letter = letter;
+  t.draggable = true;
+
+  t.addEventListener("dragstart", dragStart);
+  t.addEventListener("dragend", dragEnd);
+
+  parent.appendChild(t);
+}
+
+/* ======= DRAG FUNCTIONS ======= */
 function dragStart(){
   draggedTile = this;
   this.style.opacity = "0.3";
 }
 function dragEnd(){
   this.style.opacity = "1";
+  draggedTile = null;
 }
-function dragOver(e){
+function allowDrop(e){
   e.preventDefault();
 }
 
-/* -----------------------------------------
-   DROP IN SLOT (einsetzen / tauschen)
------------------------------------------ */
+/* ======= DROP INTO SLOT ======= */
 function dropIntoSlot(e){
   e.preventDefault();
-
   if(!draggedTile) return;
 
-  // Falls im Slot bereits ein Buchstabe liegt → zurück in Pool
-  if(this.textContent.trim() !== ""){
-    const old = document.createElement("div");
-    old.className = "letterTile";
-    old.textContent = this.textContent.trim();
-    old.dataset.letter = this.textContent.trim();
-    old.draggable = true;
-    old.addEventListener("dragstart", dragStart);
-    old.addEventListener("dragend", dragEnd);
+  const letter = draggedTile.dataset.letter;
 
-    document.getElementById("puzzleLetters").appendChild(old);
+  // Wenn Slot belegt → alten Buchstaben zurück in Pool
+  if(this.textContent.trim() !== ""){
+    const oldLetter = this.textContent.trim();
+    createTile(oldLetter, document.getElementById("puzzleLetters"));
   }
 
-  // Slot mit neuem Buchstaben belegen
-  this.textContent = draggedTile.dataset.letter;
+  // Slot befüllen
+  this.textContent = letter;
+
+  // Kachel entfernen
   draggedTile.remove();
 
-  checkPuzzleSolved();
+  checkSolved();
 }
 
-/* -----------------------------------------
-   DROP IN POOL (Buchstabe zurück unten ablegen)
------------------------------------------ */
+/* ======= DROP INTO POOL (zurücklegen) ======= */
 function dropIntoPool(e){
   e.preventDefault();
-
   if(!draggedTile) return;
 
-  // Wenn der Buchstabe aus einem Slot kommt: Slot leeren
-  const slots = document.querySelectorAll(".slot");
-  slots.forEach(slot=>{
-    if(slot.textContent.trim() === draggedTile.dataset.letter){
+  const pool = document.getElementById("puzzleLetters");
+  const letter = draggedTile.dataset.letter;
+
+  // Wenn der jeweilige Slot den Buchstaben enthält → leeren
+  document.querySelectorAll(".slot").forEach(slot=>{
+    if(slot.textContent.trim() === letter){
       slot.textContent = "";
     }
   });
 
-  // Buchstabe zurücklegen
-  const pool = document.getElementById("puzzleLetters");
-  draggedTile.style.opacity = "1";
+  // Kachel zurücklegen
+  createTile(letter, pool);
 
-  // Neu positionieren
-  pool.appendChild(draggedTile);
+  draggedTile.remove();
 
-  checkPuzzleSolved();
+  checkSolved();
 }
 
-/* -----------------------------------------
-   PUZZLE PRÜFUNG
------------------------------------------ */
-function checkPuzzleSolved(){
-  const slots = Array.from(document.querySelectorAll(".slot"));
-  const word = slots.map(s => s.textContent.trim()).join("");
+/* ======= PRÜFEN ======= */
+function checkSolved(){
+  const content = [...document.querySelectorAll(".slot")]
+                 .map(s => s.textContent.trim())
+                 .join("");
 
-  if(word.length === 8 && word === "HERZKERN"){
+  if(content === "HERZKERN"){
     setTimeout(()=>{
       document.getElementById("puzzleOverlay").style.display="none";
       document.getElementById("finalOverlay").style.display="flex";
     }, 300);
   }
 }
+
 </script>
-</body>
-</html>
