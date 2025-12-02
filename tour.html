@@ -737,8 +737,14 @@ function createTile(letter, parent){
   t.dataset.letter = letter;
   t.draggable = true;
 
+  // Maus
   t.addEventListener("dragstart", dragStart);
   t.addEventListener("dragend", dragEnd);
+
+  // Touch
+  t.addEventListener("touchstart", touchStart, { passive:false });
+  t.addEventListener("touchmove", touchMove, { passive:false });
+  t.addEventListener("touchend", touchEnd, { passive:false });
 
   parent.appendChild(t);
 }
@@ -747,6 +753,57 @@ function createTile(letter, parent){
 function dragStart(){
   draggedTile = this;
   this.style.opacity = "0.3";
+}
+
+/* ============================
+   TOUCH DRAG & DROP FÜR HANDY
+============================ */
+
+let touchTile = null;
+
+function touchStart(e){
+  e.preventDefault();
+  touchTile = this;
+  this.style.opacity = "0.4";
+}
+
+function touchMove(e){
+  e.preventDefault();
+  if(!touchTile) return;
+
+  const touch = e.touches[0];
+  const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+
+  // Slots hervorheben, wenn darüber
+  document.querySelectorAll(".slot").forEach(s => s.style.outline = "");
+  if(elem && elem.classList.contains("slot")){
+    elem.style.outline = "3px solid #1f6f49";
+  }
+}
+
+function touchEnd(e){
+  if(!touchTile) return;
+
+  touchTile.style.opacity = "1";
+
+  const touch = e.changedTouches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+
+  // Hervorhebung entfernen
+  document.querySelectorAll(".slot").forEach(s => s.style.outline = "");
+
+  draggedTile = touchTile;
+
+  if(target && target.classList.contains("slot")){
+    // Drop in Slot simulieren
+    dropIntoSlot.call(target, e);
+  } else {
+    // Zurück in den Buchstabenpool
+    const pool = document.getElementById("puzzleLetters");
+    dropIntoPool.call(pool, e);
+  }
+
+  touchTile = null;
 }
 
 /* DRAG END */
@@ -838,5 +895,6 @@ function resetPuzzle(){
 </script>
 </body>
 </html>
+
 
 
