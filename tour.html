@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zirbels Rätseltour – Hapimag Bad Gastein</title>
+
+<style>
+/* -----------------------------------------
+   GRUND-FARBEN & BASIS-DESIGN
+----------------------------------------- */
+:root{
+  --wald: #0e2e1f;
+  --wald-hell: #1c4b34; /* FIXED */
+  --moos: #1f6f49;
+  --text: #0e3020;
+  --karte: rgba(255,255,255,0.98);
+  --radius: 22px;
+  --shadow: 0 10px 40px rgba(0,0,0,0.22);
+}
+
+* { box-sizing: border-box; }
+
+body{
+  margin:0;
+  font-family: system-ui, Arial, sans-serif;
+  color:var(--text);
+  background: linear-gradient(180deg,#ecf8f1,#d7f1e4,#b4e3cc,#9cd8bf);
+  min-height:100vh;
+}
+
+/* -----------------------------------------
+   ZENTRALE KARTE
+----------------------------------------- */
+.wrap{
+  width:min(980px,100%);
+  margin:auto;
+  padding:18px;
+}
+
+.card{
+  background:var(--karte);
+  padding:22px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+/* -----------------------------------------
+   HEAD
+----------------------------------------- */
+.head{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+}
+.zirbel-mini{
+  width:70px;
+}
+.title{
+  margin:0;
+  color:var(--moos);
+  font-size:clamp(1.6rem,2vw,2rem);
+}
+.badge{
+  display:inline-block;
+  margin-top:4px;
+  padding:4px 10px;
+  background:#e8f6ef;
+  color:var(--moos);
+  border-radius:14px;
+  font-size:.85rem;
+  border:1px solid #bfe8cf;
+}
+
+/* -----------------------------------------
+   BUTTONS
+----------------------------------------- */
+button{
+  cursor:pointer;
+  padding:.9rem 1.4rem;
+  border-radius:14px;
+  border:2px solid var(--moos);
+  font-weight:700;
+  font-size:1rem;
+  transition:0.2s;
+  background:var(--moos);
+  color:white;
+}
+button:hover{ filter:brightness(1.12); }
+button.secondary{
+  background:white;
+  color:var(--moos);
+}
+button:disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+  filter:none;
+}
+
+/* -----------------------------------------
+   LEVEL-BUTTON-FIX
+----------------------------------------- */
+.levelBtns{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+  gap:14px;
+  justify-items:center;
+}
+
+/* -----------------------------------------
+   INPUT
+----------------------------------------- */
+label{
+  font-weight:600;
+  margin-top:1rem;
+  display:block;
+}
+input{
+  width:100%;
+  padding:.9rem 1rem;
+  margin-top:.3rem;
+  border:2px solid #bfe8cf;
+  border-radius:14px;
+  font-size:1rem;
+}
+
+/* -----------------------------------------
+   FEEDBACK
+----------------------------------------- */
+.err{
+  display:none;
+  color:#c62828;
+  font-weight:700;
+  margin-top:.7rem;
+}
+.ok{
+  display:none;
+  background:#e8ffe8;
+  border:2px solid #62c06c;
+  padding:.9rem 1rem;
+  margin-top:.9rem;
+  border-radius:14px;
+  color:#115b17;
+  font-weight:700;
+}
+
+/* -----------------------------------------
+   ORTS-BOX
+----------------------------------------- */
+.loc{
+  display:none;
+  background:#e6f7ef;
+  border:2px solid #b5e7cd;
+  padding:1rem;
+  margin-top:1rem;
+  border-radius:14px;
+  font-weight:700;
+}
+
+/* -----------------------------------------
+   OVERLAYS
+----------------------------------------- */
+.fullOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+
+.levelBox, .introBox, .popupBox{
+  width:min(900px,92%);
+  max-height:92vh;
+  background:white;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+
+.levelInner, .introInner, .popupInner{
+  padding:24px;
+  text-align:center;
+}
+
+.intro-zirbel, .popup-zirbel{
+  max-width:260px;
+  display:block;
+  margin:auto;
+}
+
+/* -----------------------------------------
+   POPUP
+----------------------------------------- */
+#letterPopup{
+  display:none;
+}
+
+.popupFooter{
+  padding:12px;
+  background:#f1fff4;
+  border-top:1px solid #d9f2df;
+  text-align:center;
+}
+
+/* -----------------------------------------
+   PUZZLE (Drag & Drop)
+----------------------------------------- */
+#puzzleOverlay{
+  display:none;
+}
+
+.puzzleBox{
+  width:min(900px,92%);
+  background:white;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:26px;
+  text-align:center;
+}
+
+.puzzleSlots, .puzzleLetters{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.slot{
+  width:60px;
+  height:60px;
+  border:2px dashed #bfe8cf;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.7rem;
+  font-weight:800;
+  color:var(--moos);
+  background:#f8fffb;
+}
+
+.letterTile{
+  width:60px;
+  height:60px;
+  background:var(--moos);
+  color:white;
+  font-size:1.7rem;
+  font-weight:800;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:grab;
+  user-select:none;
+}
+
+.letterTile:active{
+  cursor:grabbing;
+  transform:scale(1.08);
+}
+</style>
+</head>
+
+<body>
+<!-- LEVEL -->
+<div id="levelOverlay" class="fullOverlay">
+  <div class="levelBox">
+    <div class="levelInner">
+      <h2 class="levelTitle">Wähle deine Rätsel-Stufe</h2>
+      <p>Je älter du bist, desto kniffliger werden die Fragen.<br>Alle gehen aber zu denselben Orten.</p>
+
+      <div class="levelBtns">
+        <button class="levelBtn" data-lvl="1">🟢 Stufe 1 (6–8 Jahre)</button>
+        <button class="levelBtn" data-lvl="2">🟡 Stufe 2 (9–11 Jahre)</button>
+        <button class="levelBtn" data-lvl="3">🟠 Stufe 3 (12–13 Jahre)</button>
+        <button class="levelBtn" data-lvl="4">🔴 Stufe 4 (14–16 Jahre)</button>
+      </div>
+    </div>
+    <div class="popupFooter">
+      <small>Hapimag Bad Gastein – Prinz Zirbels Rätsel-Abenteuer</small>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO -->
+<div id="introOverlay" class="fullOverlay" style="display:none;">
+  <div class="introBox">
+    <div class="introInner">
+      <h2 class="introTitle">Prinz Zirbel braucht deine Hilfe!</h2>
+      <img src="Prinz Zirbel 40 x 50.jpg" class="intro-zirbel">
+
+      <p class="introText">
+Im tiefen Zirbenwald von Bad Gastein wacht Prinz Zirbel seit über hundert Jahren über Tiere, Menschen und Berge.
+Als vom Licht von Sonne, Mond und Sternen erwählter Wächter spürt er jede Veränderung im Wald – jeden Windhauch, jeden Schritt, jedes Flüstern.
+Doch heute ist etwas Ungewöhnliches geschehen. Etwas Gefährliches.
+Sein magischer Herzstein, die Quelle seiner Kraft und seines uralten Wissens, ist verschwunden.
+Ohne ihn beginnen die Tiere nervös zu werden, die Bäume warnend zu rauschen, und ein kühler Schatten zieht langsam über das Tal.
+Zirbel spürt, dass der Wald seine Hilfe nicht mehr alleine rufen kann.
+Darum wendet er sich an dich.
+Folge den versteckten Spuren im Resort, löse die Rätsel und höre genau hin…
+denn irgendwo hier liegt die Antwort.
+Nur wer mutig und aufmerksam ist, kann herausfinden, wohin der Herzstein verschwunden ist –
+und ihn rechtzeitig zurückbringen, bevor der Zirbenwald seine Magie verliert.
+      </p>
+
+      <button id="readBtn" class="secondary">▶️ Vorlesen</button>
+      <audio id="introAudio" preload="auto" src="ElevenLabs_Text_to_Speech_audio.mp3"></audio>
+
+    </div>
+
+    <div class="popupFooter">
+      <button id="startBtn" disabled>Weiter zum Abenteuer ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP nach Buchstabe -->
+<div id="letterPopup" class="fullOverlay">
+  <div class="popupBox">
+    <div class="popupInner">
+      <img src="Prinz Zirbel 40 x 50.jpg" class="popup-zirbel">
+      <h2>Super gemacht!</h2>
+      <p id="popupText">Du hast den richtigen Buchstaben gefunden!</p>
+    </div>
+    <div class="popupFooter">
+      <button id="popupNextBtn">Weiter ➜</button>
+    </div>
+  </div>
+</div>
+
+<!-- HAUPT-RÄTSEL -->
+<main class="wrap">
+  <section class="card" id="mainCard" style="display:none;">
+
+    <header class="head">
+      <img src="Prinz Zirbel 40 x 50.jpg" class="zirbel-mini">
+      <div>
+        <h1 class="title">Zirbels große Rätseltour</h1>
+        <p class="sub">Finde alle 8 Buchstaben – am Ende wartet der Herzstein!</p>
+        <span class="badge" id="badge"></span>
+      </div>
+      <img src="Prinz Zirbel 40 x 50.jpg" class="zirbel-mini">
+    </header>
+
+    <h2 id="riddleTitle">Rätsel</h2>
+    <p id="riddleText"></p>
+
+    <label>Deine Antwort</label>
+    <input id="answerInput" autocomplete="off" placeholder="Antwort eingeben…">
+
+    <button id="checkAnswerBtn" style="margin-top:1rem;">Antwort prüfen</button>
+
+    <div class="err" id="errBox">Leider falsch – versuch's nochmal!</div>
+    <div class="ok" id="okBox">Richtig!</div>
+
+    <div id="locBox" class="loc"></div>
+
+    <div id="letterStep" style="display:none;">
+      <label>Buchstabe vom Ort</label>
+      <input id="letterInput" maxlength="1" placeholder="Buchstabe eingeben…">
+    </div>
+
+  </section>
+</main>
+
+<!-- PUZZLE OVERLAY -->
+<div id="puzzleOverlay" class="fullOverlay">
+  <div class="puzzleBox">
+    <h2>Buchstaben sortieren</h2>
+    <p>Ziehe die Buchstaben in die richtige Reihenfolge.</p>
+
+    <div class="puzzleSlots" id="puzzleSlots"></div>
+    <div class="puzzleLetters" id="puzzleLetters"></div>
+  </div>
+</div>
+
+<!-- FINALE -->
+<div id="finalOverlay" class="fullOverlay" style="display:none;">
+  <div class="introBox">
+    <div class="introInner" style="text-align:center;">
+      <img src="Prinz Zirbel 40 x 50.jpg" class="intro-zirbel">
+      <h2 class="introTitle">Du hast es geschafft!</h2>
+      <p>
+        Du hast alle Buchstaben richtig sortiert!<br><br>
+        Gehe nun zur Rezeption und sage das Lösungswort.<br>
+        Prinz Zirbel ist stolz auf dich! 🌲✨
+      </p>
+    </div>
+
+    <div class="popupFooter">
+      <button onclick="location.reload()">Nochmal spielen</button>
+    </div>
+  </div>
+</div>
+<script>
+/* LEVEL */
+let currentLevel = 1;
+let currentStation = 1;
+let collectedLetters = [];
+
+/* LEVEL-Auswahl */
+document.querySelectorAll(".levelBtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    currentLevel = Number(btn.dataset.lvl);
+    document.getElementById("levelOverlay").style.display="none";
+    document.getElementById("introOverlay").style.display="flex";
+  });
+});
+
+/* INTRO AUDIO */
+const audio = document.getElementById("introAudio");
+const readBtn = document.getElementById("readBtn");
+const startBtn = document.getElementById("startBtn");
+let isPlaying = false;
+
+startBtn.disabled = true;
+
+readBtn.addEventListener("click", async ()=>{
+  if(!isPlaying){
+    audio.currentTime = 0;
+    await audio.play();
+    isPlaying = true;
+    readBtn.textContent = "⏸️ Pause";
+  } else {
+    audio.pause();
+    isPlaying = false;
+    readBtn.textContent = "▶️ Vorlesen";
+  }
+});
+
+audio.addEventListener("ended", ()=>{
+  isPlaying = false;
+  readBtn.textContent = "▶️ Vorlesen";
+  startBtn.disabled = false;
+});
+
+startBtn.addEventListener("click", ()=>{
+  document.getElementById("introOverlay").style.display="none";
+  document.getElementById("mainCard").style.display="block";
+  loadStation(1);
+});
+
+/* RÄTSEL (vollständig 1:1 aus deinem Code) */
+const riddles = {
+  1:[
+    {q:"Prinz Zirbel ist ein besonderer Baum. Welche Baumart ist er?", a:["zirbe","zirbel","zirbelkiefer"]},
+    {q:"In welchem Ort wohnt Prinz Zirbel?", a:["bad gastein","gastein"]},
+    {q:"Was hat Prinz Zirbel verloren?", a:["herzstein","magischer herzstein"]},
+    {q:"Was findest du in den Bergen von Gastein überall?", a:["bäume","wald"]},
+    {q:"Woher kommt die warme Luft aus der Erde in Gastein?", a:["quellen","thermalquellen","heiße quellen"]},
+    {q:"Wie nennt man junge Gäste im Resort?", a:["kinder","kids"]},
+    {q:"Was schützt Prinz Zirbel?", a:["wald","tiere","menschen"]},
+    {q:"Welche Farbe hat Zirbels Mantel?", a:["rot"]}
+  ],
+  2:[
+    {q:"Wie heißt die Baumart, aus der Zirbel stammt?", a:["zirbe","zirbelkiefer"]},
+    {q:"Wie heißt das Tal, in dem Bad Gastein liegt?", a:["gasteinertal","gasteiner tal"]},
+    {q:"Wie heißt der magische Gegenstand, den Zirbel verloren hat?", a:["herzstein"]},
+    {q:"Wie nennt man die berühmten warmen Wasser von Bad Gastein?", a:["thermalquellen","heiße quellen"]},
+    {q:"Wer kann Prinz Zirbel manchmal verstehen?", a:["kinder","menschen"]},
+    {q:"Welche Tiere können im Wald wohnen?", a:["hirsche","füchse","eichhörnchen","vögel"]},
+    {q:"Was rauscht im Wald, wenn Gefahr droht?", a:["bäume","zweige","blätter"]},
+    {q:"Wie nennt man hohe Berge rund um Gastein?", a:["alpen","berge"]}
+  ],
+  3:[
+    {q:"Welche besondere Eigenschaft hat eine Zirbelkiefer?", a:["duftet","duftet gut","harzig","ätherisch"]},
+    {q:"Warum kommt man nach Bad Gastein? (eine Antwort)", a:["therme","wandern","ski","wellness"]},
+    {q:"Wie heißt Zirbels Kraftquelle?", a:["herzstein"]},
+    {q:"Was schützt Zirbel im Wald?", a:["tiere","menschen","natur"]},
+    {q:"Wie nennt man die Region, in der Gastein liegt?", a:["salzburg","salzburgerland"]},
+    {q:"Was flüstern Bäume bei Gefahr?", a:["warnung","gefahr","vorsicht"]},
+    {q:"Was findet man im Resort für junge Gäste?", a:["jugendraum","kidsclub","spielraum"]},
+    {q:"Was machen Berge im Wind?", a:["rauschen","klingen","donnern"]}
+  ],
+  4:[
+    {q:"Welche Höhenlage macht Bad Gastein bekannt?", a:["hochalpin","alpin"]},
+    {q:"Wie nennt man die warmen Quellen im Gasteinertal?", a:["thermalquellen"]},
+    {q:"Welcher magische Gegenstand fehlt Zirbel?", a:["herzstein"]},
+    {q:"Wer war früher wichtiger Besucher Gasteins? (eine Antwort)", a:["kaiser","franz josef","erzherzog karl"]},
+    {q:"Wie nennt man die typische Zirbenholz-Eigenschaft?", a:["duftend","ätherisch","harzig"]},
+    {q:"Was beschützt Zirbel seit Jahrhunderten?", a:["wald","tiere","menschen","natur"]},
+    {q:"Was findet man überall im Resort, um sich zu orientieren?", a:["wegweiser","schilder","karten"]},
+    {q:"Wie nennt man den felsigen Bereich rund um den Wasserfall?", a:["schlucht","klamm"]}
+  ]
+};
+
+/* ORTE + BUCHSTABEN */
+const stations = [
+  null,
+  {place:"Zauberwald (Kinderspielraum)", letter:"K"},
+  {place:"Haus 1 – Ausgang Promenade", letter:"R"},
+  {place:"Haus 3 – Ausgang Promenade", letter:"H"},
+  {place:"Jugendraum", letter:"E"},
+  {place:"Restaurant-Eingang", letter:"N"},
+  {place:"Haus 4 – Ebene 4", letter:"Z"},
+  {place:"Haus 4 – Ebene 3 – Verbindungsgang", letter:"E"},
+  {place:"Vor dem Aktivraum", letter:"R"}
+];
+
+/* STATION LADEN */
+function loadStation(n){
+  currentStation = n;
+
+  if(n > 8){
+    startPuzzle();
+    return;
+  }
+
+  const r = riddles[currentLevel][n-1];
+
+  document.getElementById("badge").textContent = `Station ${n} / 8`;
+  document.getElementById("riddleText").textContent = r.q;
+
+  document.getElementById("answerInput").value="";
+  document.getElementById("letterInput").value="";
+  document.getElementById("errBox").style.display="none";
+  document.getElementById("okBox").style.display="none";
+  document.getElementById("locBox").style.display="none";
+  document.getElementById("letterStep").style.display="none";
+}
+
+/* ANTWORT PRÜFEN */
+document.getElementById("checkAnswerBtn").addEventListener("click", ()=>{
+  const val = normalize(document.getElementById("answerInput").value);
+  const correct = riddles[currentLevel][currentStation-1].a;
+
+  const ok = correct.some(c => normalize(c) === val);
+
+  if(!ok){
+    document.getElementById("errBox").style.display="block";
+    return;
+  }
+
+  document.getElementById("errBox").style.display="none";
+  document.getElementById("okBox").style.display="block";
+
+  const st = stations[currentStation];
+  document.getElementById("locBox").style.display="block";
+  document.getElementById("locBox").innerHTML =
+    `📍 <b>Ort:</b> ${st.place}<br>Suche dort den Buchstaben!`;
+
+  document.getElementById("letterStep").style.display="block";
+});
+
+/* BUCHSTABE PRÜFEN */
+document.getElementById("letterInput").addEventListener("input", ()=>{
+  const val = document.getElementById("letterInput").value.trim().toUpperCase();
+  const needed = stations[currentStation].letter;
+
+  if(val === needed){
+    collectedLetters.push(val);
+    document.getElementById("letterPopup").style.display="flex";
+  }
+});
+
+/* POPUP → Weiter */
+document.getElementById("popupNextBtn").addEventListener("click", ()=>{
+  document.getElementById("letterPopup").style.display="none";
+  loadStation(currentStation+1);
+});
+
+/* NORMALISIERUNG */
+function normalize(s){
+  return s.toLowerCase().trim()
+    .replace(/ä/g,'ae')
+    .replace(/ö/g,'oe')
+    .replace(/ü/g,'ue')
+    .replace(/ß/g,'ss');
+}
+
+/* -----------------------------------------
+   PUZZLE – Drag & Drop
+----------------------------------------- */
+function startPuzzle(){
+  document.getElementById("mainCard").style.display="none";
+  document.getElementById("puzzleOverlay").style.display="flex";
+
+  // Slots erzeugen
+  const slots = document.getElementById("puzzleSlots");
+  slots.innerHTML = "";
+  for(let i=0; i<8; i++){
+    const s = document.createElement("div");
+    s.className = "slot";
+    s.dataset.index = i;
+    slots.appendChild(s);
+  }
+
+  // Buchstaben mischen
+  const letters = [...collectedLetters];
+  letters.sort(() => Math.random() - 0.5);
+
+  const tiles = document.getElementById("puzzleLetters");
+  tiles.innerHTML = "";
+
+  letters.forEach(L=>{
+    const t = document.createElement("div");
+    t.className = "letterTile";
+    t.textContent = L;
+    t.draggable = true;
+    t.dataset.letter = L;
+
+    t.addEventListener("dragstart", dragStart);
+    t.addEventListener("dragend", dragEnd);
+
+    tiles.appendChild(t);
+  });
+
+  document.querySelectorAll(".slot").forEach(slot=>{
+    slot.addEventListener("dragover", dragOver);
+    slot.addEventListener("drop", dropLetter);
+  });
+}
+
+let draggedTile = null;
+
+function dragStart(){
+  draggedTile = this;
+  setTimeout(()=> this.style.opacity = "0.3", 0);
+}
+
+function dragEnd(){
+  this.style.opacity = "1";
+}
+
+function dragOver(e){
+  e.preventDefault();
+}
+
+function dropLetter(e){
+  e.preventDefault();
+  if(!draggedTile) return;
+
+  if(this.textContent.trim() === ""){
+    this.textContent = draggedTile.dataset.letter;
+    draggedTile.remove();
+    checkPuzzleSolved();
+  }
+}
+
+function checkPuzzleSolved(){
+  const slots = Array.from(document.querySelectorAll(".slot"));
+  const word = slots.map(s => s.textContent.trim()).join("");
+
+  if(word.length === 8 && word === "HERZKERN"){
+    setTimeout(()=>{
+      document.getElementById("puzzleOverlay").style.display="none";
+      document.getElementById("finalOverlay").style.display="flex";
+    }, 300);
+  }
+}
+</script>
+
+</body>
+</html>
