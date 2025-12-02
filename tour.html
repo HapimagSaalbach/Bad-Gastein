@@ -587,7 +587,7 @@ function normalize(s){
 }
 
 /* ============================================================
-   PUZZLE – DRAG & DROP (NEUE, KORRIGIERBARE VERSION)
+   PUZZLE – DRAG & DROP (mit Reset bei falschem Wort)
 ============================================================ */
 
 let draggedTile = null;
@@ -639,42 +639,42 @@ function createTile(letter, parent){
   parent.appendChild(t);
 }
 
-/* DRAG START & END */
+/* DRAG START */
 function dragStart(){
   draggedTile = this;
   this.style.opacity = "0.3";
 }
+
+/* DRAG END */
 function dragEnd(){
   this.style.opacity = "1";
   draggedTile = null;
 }
+
 function allowDrop(e){
   e.preventDefault();
 }
 
-/* DROP INTO SLOT (KORRIGIERBAR) */
+/* DROP INTO SLOT */
 function dropIntoSlot(e){
   e.preventDefault();
   if(!draggedTile) return;
 
   const letter = draggedTile.dataset.letter;
 
-  // Wenn im Slot schon ein Buchstabe ist → zurück in den Pool
+  // Slot war schon besetzt → alten Buchstaben zurück in den Pool
   if(this.textContent.trim() !== ""){
     const oldLetter = this.textContent.trim();
     createTile(oldLetter, document.getElementById("puzzleLetters"));
   }
 
-  // Slot mit neuem Buchstaben auffüllen
   this.textContent = letter;
-
-  // Alte Kachel entfernen
   draggedTile.remove();
 
   checkSolved();
 }
 
-/* DROP INTO POOL (zurücklegen) */
+/* DROP BACK INTO POOL */
 function dropIntoPool(e){
   e.preventDefault();
   if(!draggedTile) return;
@@ -682,7 +682,7 @@ function dropIntoPool(e){
   const pool = document.getElementById("puzzleLetters");
   const letter = draggedTile.dataset.letter;
 
-  // Wenn dieser Buchstabe irgendwo im Slot steht → Slot leeren
+  // Slot leeren, falls der Buchstabe dort war
   document.querySelectorAll(".slot").forEach(slot=>{
     if(slot.textContent.trim() === letter){
       slot.textContent = "";
@@ -698,15 +698,38 @@ function dropIntoPool(e){
 /* LÖSUNG PRÜFEN */
 function checkSolved(){
   const word = [...document.querySelectorAll(".slot")]
-               .map(s=>s.textContent.trim())
+               .map(s => s.textContent.trim())
                .join("");
 
+  // Nur prüfen, wenn alle 8 Buchstaben gesetzt sind
+  if(word.length !== 8) return;
+
   if(word === "HERZKERN"){
+    // richtige Lösung → Finale anzeigen
     setTimeout(()=>{
       document.getElementById("puzzleOverlay").style.display="none";
       document.getElementById("finalOverlay").style.display="flex";
     }, 300);
+  } else {
+    // ❌ falsches Wort → automatisch alles zurücksetzen
+    setTimeout(resetPuzzle, 500);
   }
+}
+
+/* RESET FUNKTION – ALLE BUCHSTABEN FALLEN NACH UNTEN */
+function resetPuzzle(){
+  const pool = document.getElementById("puzzleLetters");
+  pool.innerHTML = ""; // alten Pool leeren
+
+  const slots = document.querySelectorAll(".slot");
+
+  slots.forEach(slot=>{
+    const letter = slot.textContent.trim();
+    if(letter !== ""){
+      createTile(letter, pool);
+      slot.textContent = "";
+    }
+  });
 }
 </script>
 </body>
