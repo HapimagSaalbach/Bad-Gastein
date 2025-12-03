@@ -556,44 +556,47 @@ startBtn.addEventListener("click", ()=>{
 ============================================================ */
 const riddles = {
   1:[
-    {q:"Prinz Zirbel ist ein besonderer Baum. Welche Baumart ist er?", a:["zirbe","zirbel","zirbelkiefer"]},
-    {q:"In welchem Ort wohnt Prinz Zirbel?", a:["bad gastein","gastein"]},
-    {q:"Was hat Prinz Zirbel verloren?", a:["herzstein","magischer herzstein"]},
-    {q:"Was findest du in den Bergen von Gastein überall?", a:["bäume","wald"]},
-    {q:"Woher kommt die warme Luft aus der Erde in Gastein?", a:["quellen","thermalquellen","heiße quellen"]},
-    {q:"Wie nennt man junge Gäste im Resort?", a:["kinder","kids"]},
-    {q:"Was schützt Prinz Zirbel?", a:["wald","tiere","menschen"]},
-    {q:"Welche Farbe hat Zirbels Mantel?", a:["rot"]}
+    {q:"Welche Farbe hat der Mantel von Prinz Zirbel?", a:["rot"]},
+    {q:"Was wächst im Wald ganz besonders oft?", a:["bäume","baum"]},
+    {q:"Welches Tier kann im Wald wohnen?", a:["hirsch","fuchs","eichhörnchen","vogel"]},
+    {q:"Was hat Prinz Zirbel verloren?", a:["herzstein"]},
+    {q:"Wie nennt man Kinder im Resort?", a:["kinder","kids"]},
+    {q:"Was hörst du im Wald, wenn der Wind weht?", a:["blätter","bäume","zweige","rauschen"]},
+    {q:"Welche Farbe hat der Wald meistens?", a:["grün"]},
+    {q:"Was findest du draußen: Berge oder Palmen?", a:["berge"]}
   ],
+
   2:[
-    {q:"Wie heißt die Baumart, aus der Zirbel stammt?", a:["zirbe","zirbelkiefer"]},
+    {q:"Wie heißt das warme Wasser, das in Bad Gastein aus der Erde kommt?", a:["thermalquellen","heiße quellen","thermalwasser"]},
     {q:"Wie heißt das Tal, in dem Bad Gastein liegt?", a:["gasteinertal","gasteiner tal"]},
-    {q:"Wie heißt der magische Gegenstand, den Zirbel verloren hat?", a:["herzstein"]},
-    {q:"Wie nennt man die berühmten warmen Wasser von Bad Gastein?", a:["thermalquellen","heiße quellen"]},
-    {q:"Wer kann Prinz Zirbel manchmal verstehen?", a:["kinder","menschen"]},
-    {q:"Welche Tiere können im Wald wohnen?", a:["hirsche","füchse","eichhörnchen","vögel"]},
-    {q:"Was rauscht im Wald, wenn Gefahr droht?", a:["bäume","zweige","blätter"]},
-    {q:"Wie nennt man hohe Berge rund um Gastein?", a:["alpen","berge"]}
+    {q:"Aus welchem Baum stammt Prinz Zirbel?", a:["zirbe","zirbelkiefer"]},
+    {q:"Was schützt Prinz Zirbel im Wald?", a:["wald","tiere","menschen","natur"]},
+    {q:"Welche Tiere leben im Wald von Gastein?", a:["hirsche","füchse","eichhörnchen","vögel"]},
+    {q:"Was hörst du, wenn die hohen Bäume sich im Wind bewegen?", a:["rauschen","blätter","zweige"]},
+    {q:"Was macht man oft in Gastein?", a:["wandern","ski","therme"]},
+    {q:"Wie nennt man Wasser, das warm aus der Erde kommt?", a:["thermalwasser","heiße quelle"]}
   ],
+
   3:[
-    {q:"Welche besondere Eigenschaft hat eine Zirbelkiefer?", a:["duftet","duftet gut","harzig","ätherisch"]},
-    {q:"Warum kommt man nach Bad Gastein? (eine Antwort)", a:["therme","wandern","ski","wellness"]},
-    {q:"Wie heißt Zirbels Kraftquelle?", a:["herzstein"]},
-    {q:"Was schützt Zirbel im Wald?", a:["tiere","menschen","natur"]},
-    {q:"Wie nennt man die Region, in der Gastein liegt?", a:["salzburg","salzburgerland"]},
-    {q:"Was flüstern Bäume bei Gefahr?", a:["warnung","gefahr","vorsicht"]},
-    {q:"Was findet man im Resort für junge Gäste?", a:["jugendraum","kidsclub","spielraum"]},
-    {q:"Was machen Berge im Wind?", a:["rauschen","klingen","donnern"]}
+    {q:"Wie nennt man die Region, zu der Bad Gastein gehört?", a:["salzburger land","salzburg"]},
+    {q:"Was ist eine typische Eigenschaft von Zirbenholz?", a:["duftend","harzig","ätherisch"]},
+    {q:"Warum kommen viele Menschen nach Bad Gastein?", a:["therme","wandern","ski","wellness"]},
+    {q:"Wie heißt Zirbels magische Kraftquelle?", a:["herzstein"]},
+    {q:"Wodurch ‚sprechen‘ die Bäume bei Gefahr?", a:["blätter","zweige","rauschen"]},
+    {q:"Welche Tiere findest du im alpinen Gebiet?", a:["hirsche","füchse","adler"]},
+    {q:"Was passiert in den Bergen, wenn es sehr windig ist?", a:["rauschen","donnern"]},
+    {q:"Wie nennt man das große Gebirge rund um Gastein?", a:["alpen"]}
   ],
+
   4:[
-    {q:"Welche Höhenlage macht Bad Gastein bekannt?", a:["hochalpin","alpin"]},
-    {q:"Wie nennt man die warmen Quellen im Gasteinertal?", a:["thermalquellen"]},
-    {q:"Welcher magische Gegenstand fehlt Zirbel?", a:["herzstein"]},
-    {q:"Wer war früher wichtiger Besucher Gasteins? (eine Antwort)", a:["kaiser","franz josef","erzherzog karl"]},
-    {q:"Wie nennt man die typische Zirbenholz-Eigenschaft?", a:["duftend","ätherisch","harzig"]},
-    {q:"Was beschützt Zirbel seit Jahrhunderten?", a:["wald","tiere","menschen","natur"]},
-    {q:"Was findet man überall im Resort, um sich zu orientieren?", a:["wegweiser","schilder","karten"]},
-    {q:"Wie nennt man den felsigen Bereich rund um den Wasserfall?", a:["schlucht","klamm"]}
+    {q:"Welche berühmten Besucher kamen früher oft nach Bad Gastein?", a:["kaiser","franz josef","erzherzog karl"]},
+    {q:"Wie nennt man die felsige Schlucht rund um den Wasserfall in Gastein?", a:["klamm","schlucht"]},
+    {q:"Welche Eigenschaft macht Zirbenholz im Wellnessbereich so beliebt?", a:["duftend","ätherisch","beruhigend"]},
+    {q:"Wie nennt man die warmen natürlichen Wasserquellen im Gasteinertal?", a:["thermalquellen"]},
+    {q:"Welches alpine Klima prägt Bad Gastein?", a:["hochalpin","alpin"]},
+    {q:"Was schützt Zirbel als Wächter des Waldes seit Jahrhunderten?", a:["wald","tiere","menschen","natur"]},
+    {q:"Woran erkennt man die Landschaft rund um Bad Gastein?", a:["felsig","steil","klamm"]},
+    {q:"Wie nennt man Schilder und Tafeln, die dir im Resort den Weg zeigen?", a:["wegweiser","schilder","karten"]}
   ]
 };
 
@@ -895,6 +898,7 @@ function resetPuzzle(){
 </script>
 </body>
 </html>
+
 
 
 
